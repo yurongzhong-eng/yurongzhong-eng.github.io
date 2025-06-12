@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UOC启动表单</title>
+    <style>
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 8px; }
+        .char-counter { float: right; font-size: 12px; color: #999; }
+    </style>
+</head>
+<body>
+    <form id="uocForm">
+        <!-- 1. UOC类型 -->
+        <div class="form-group">
+            <label>启U类型</label>
+            <select name="uocType" required>
+                <option value="">请选择</option>
+                <option value="子系统编码">子系统编码</option>
+                <option value="云产品编码">云产品编码</option>
+            </select>
+        </div>
+
+        <!-- 2. 子系统编码 -->
+        <div class="form-group" id="subsystemGroup">
+            <label>子系统编码</label>
+            <select name="subsystemCode" required>
+                <option value="">请选择子系统编码</option>
+                <!-- 动态加载选项 -->
+            </select>
+        </div>
+
+        <!-- 3. 决策人 -->
+        <div class="form-group">
+            <label>决策人</label>
+            <input type="text" name="decisionMaker" placeholder="请输入工程或姓名" required>
+        </div>
+
+        <!-- 4. 启动级别 -->
+        <div class="form-group">
+            <label>级</label>
+            <select name="level" required>
+                <option value="">请选择</option>
+                <option value="低级">低级</option>
+                <option value="中级">中级</option>
+                <option value="高级">高级</option>
+                <option value="测试环境">测试环境</option>
+            </select>
+        </div>
+
+        <!-- 5. 来源 -->
+        <div class="form-group">
+            <label>来源</label>
+            <select name="source" required>
+                <option value="">请选择</option>
+                <option value="监控">监控</option>
+                <option value="运维发现">运维发现</option>
+                <option value="用户报废">用户报废</option>
+            </select>
+        </div>
+
+        <!-- 6. 现象描述 -->
+        <div class="form-group">
+            <label>现象描述</label>
+            <textarea name="description" maxlength="50" required></textarea>
+            <div class="char-counter"><span id="charCount">0</span>/50</div>
+        </div>
+
+        <!-- 7. 按钮 -->
+        <button type="button" id="cancelBtn">取消</button>
+        <button type="submit">确定启动</button>
+    </form>
+
+    <script>
+        // 字符计数
+        document.querySelector('textarea').addEventListener('input', function(e) {
+            document.getElementById('charCount').textContent = e.target.value.length;
+        });
+
+        // 表单提交
+        document.getElementById('uocForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                uocType: document.querySelector('select[name="uocType"]').value,
+                subsystemCode: document.querySelector('select[name="subsystemCode"]').value,
+                decisionMaker: document.querySelector('input[name="decisionMaker"]').value,
+                level: document.querySelector('select[name="level"]').value,
+                source: document.querySelector('select[name="source"]').value,
+                description: document.querySelector('textarea[name="description"]').value
+            };
+
+            try {
+                const response = await fetch('/uoc-start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    alert('提交成功！');
+                    this.reset();
+                    document.getElementById('charCount').textContent = '0';
+                }
+            } catch (error) {
+                alert('提交失败：' + error.message);
+            }
+        });
+
+        // 取消按钮
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            if(confirm('确定取消？')) {
+                document.getElementById('uocForm').reset();
+                document.getElementById('charCount').textContent = '0';
+            }
+        });
+    </script>
+</body>
+</html>
